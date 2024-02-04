@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     # ex: /kyselyt/
     path("", views.index, name="index"),
+    
     # ex: /kyselyt/5/
     path("<int:question_id>/", views.yksityiskohdat, name="yksityiskohdat"),
     # ex: /kyselyt/5/results/
