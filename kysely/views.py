@@ -1,23 +1,45 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import loader
-from .models import Kysymys
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.views import generic
 
-def index(request):
-    latest_question_list = Kysymys.objects.order_by("-julkaisupvm")[:5]
-    context = {
-        "latest_question_list": latest_question_list,
-    }
-    return render(request, "kyselyt/index.html", context)
-
-def yksityiskohdat(request, question_id):
-    return HttpResponse("You're looking at question %s." % question_id)
+from .models import Kysymys, Vaihtoehto
 
 
-def tulokset(request, question_id):
-    response = "You're looking at the results of question %s."
-    return HttpResponse(response % question_id)
+class ListaNäkymä(generic.ListView):
+    template_name = "kysely/indeksi.html"
+    context_object_name = "kysymykset"
+
+    def get_queryset(self):
+        return Kysymys.objects.order_by("-julkaisupvm")[:2]
 
 
-def äänestä(request, question_id):
-    return HttpResponse("You're voting on question %s." % question_id)
+class NäytäNäkymä(generic.DetailView):
+    model = Kysymys
+    template_name = "kysely/näytä.html"
+
+
+class TuloksetNäkymä(generic.DetailView):
+    model = Kysymys
+    template_name = "kysely/tulokset.html"
+
+
+def äänestä(request, kysymys_id):
+    kysym = get_object_or_404(Kysymys, pk=kysymys_id)
+    try:
+        valittu = kysym.vaihtoehto_set.get(pk=request.POST["valittu"])
+    except (KeyError, Vaihtoehto.DoesNotExist):
+        # Näytä kysymyslomake uudelleen
+        return render(
+            request,
+            "kysely/näytä.html",
+            {
+                "kysymys": kysym,
+                "virheviesti": "Et valinnut mitään vaihtoehtoa.",
+            },
+        )
+    else:
+        valittu.ääniä += 1
+        valittu.save()
+        osoite = reverse("kysely:tulokset", args=(kysym.id,))
+        return HttpResponseRedirect(osoite)

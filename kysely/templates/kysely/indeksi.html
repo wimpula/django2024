@@ -1,9 +1,9 @@
-{% if latest_question_list %}
+{% if kysymykset %}
     <ul>
-    {% for question in latest_question_list %}
-        <li><a href="/kyselyt/{{ question.id }}/">{{ question.question_text }}</a></li>
+    {% for kysym in kysymykset %}
+        <li><a href="{% url 'kysely:näytä' kysym.id %}">{{kysym.teksti}}</a></li>
     {% endfor %}
     </ul>
 {% else %}
-    <p>No polls are available.</p>
+    <p>Ei kyselyitä saatavilla.</p>
 {% endif %}

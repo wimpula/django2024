@@ -2,15 +2,18 @@ from django.urls import path
 
 from . import views
 
-
+app_name = "kysely"
 urlpatterns = [
-    # ex: /kyselyt/
-    path("", views.index, name="index"),
-    
-    # ex: /kyselyt/5/
-    path("<int:question_id>/", views.yksityiskohdat, name="yksityiskohdat"),
-    # ex: /kyselyt/5/results/
-    path("<int:question_id>/tulokset/", views.tulokset, name="tulokset"),
-    # ex: /kyselyt/5/vote/
-    path("<int:question_id>/äänestä/", views.äänestä, name="äänestä"),
+    # esim. /kyselyt/
+    path("", views.ListaNäkymä.as_view(), name="indeksi"),
+    # esim. /kyselyt/5/
+    path("<int:pk>/", views.NäytäNäkymä.as_view(), name="näytä"),
+    # esim. /kyselyt/5/tulokset/
+    path(
+        "<int:pk>/tulokset/",
+        views.TuloksetNäkymä.as_view(),
+        name="tulokset",
+    ),
+    # esim. /kyselyt/5/äänestä/
+    path("<int:kysymys_id>/äänestä/", views.äänestä, name="äänestä"),
 ]
